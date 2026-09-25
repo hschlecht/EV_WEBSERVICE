@@ -1,54 +1,42 @@
-# EV Webservice - Mailer
+# EV Webservice - Outlook Mailer
 
-Webservice qui envoie un email en texte brut directement par SMTP, avec
-la bibliotheque standard Python (`smtplib` + `email`) : aucune dependance
-a Outlook ou a un client de messagerie installe sur le poste.
+Webservice local (Windows uniquement) qui pilote le client Outlook Desktop
+installe sur le poste pour envoyer un email. Au demarrage d'une requete, le
+service verifie si Outlook est deja charge ; si ce n'est pas le cas, il le
+lance automatiquement avant d'envoyer le message.
 
 Pre-requis :
+- Windows avec Microsoft Outlook Desktop installe et configure (un compte de
+  messagerie doit deja etre configure dans Outlook).
 - Python 3.10+.
-- Un compte SMTP capable d'envoyer des mails (par defaut : Office 365 /
-  Exchange Online, `smtp.office365.com:587`), avec ses identifiants.
+- Sur le(s) poste(s) qui LISENT le mail recu (le compte destinataire), il
+  faut desactiver l'option Outlook "Supprimer les sauts de ligne superflus
+  dans les messages en texte brut" : Fichier > Options > Courrier > decocher
+  cette case. Sans cela, Outlook fusionne automatiquement les lignes du
+  corps du message qui ne sont pas separees par une ligne vide (comportement
+  natif d'Outlook, independant de ce webservice).
+- Sur le poste qui ENVOIE (celui qui execute le webservice), si le mail
+  part malgre tout en HTML/RTF au lieu du texte brut, verifier dans Outlook :
+  Fichier > Options > Courrier > "Lors de l'envoi de messages a un
+  destinataire Exchange, toujours utiliser mon format par defaut au lieu du
+  format du destinataire" > cocher cette case. Outlook peut en effet
+  reprendre le format prefere du destinataire (carnet d'adresses/Exchange)
+  et l'imposer malgre le format texte brut demande par le webservice.
+  Le webservice force aussi ce format directement via la propriete MAPI
+  `PidTagMessageEditorFormat`, plus fiable que la seule propriete
+  `BodyFormat` (voir `app/outlook_service.py`).
 
 ## Installation
 
-```bash
+```powershell
 python -m venv .venv
-source .venv/bin/activate  # ou .venv\Scripts\activate sous Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Configuration (variables d'environnement)
-
-| Variable        | Obligatoire | Defaut                 | Description                                 |
-|------------------|:-----------:|-------------------------|----------------------------------------------|
-| `SMTP_HOST`      | non         | `smtp.office365.com`    | Serveur SMTP                                  |
-| `SMTP_PORT`      | non         | `587`                   | Port SMTP (STARTTLS)                          |
-| `SMTP_USER`      | **oui**     | -                        | Compte utilise pour l'authentification SMTP   |
-| `SMTP_PASSWORD`  | **oui**     | -                        | Mot de passe (ou mot de passe applicatif)     |
-| `SMTP_FROM`      | non         | valeur de `SMTP_USER`   | Adresse d'expedition affichee                 |
-
-Exemple (Linux/macOS) :
-
-```bash
-export SMTP_USER="moi@monentreprise.com"
-export SMTP_PASSWORD="mot-de-passe-applicatif"
-```
-
-Exemple (PowerShell) :
-
-```powershell
-$env:SMTP_USER = "moi@monentreprise.com"
-$env:SMTP_PASSWORD = "mot-de-passe-applicatif"
-```
-
-Si ton serveur SMTP est un relai interne sans authentification, mets
-`SMTP_USER`/`SMTP_PASSWORD` a une valeur non vide quand meme (la
-verification ne fait que s'assurer que les variables sont definies) ou
-adapte `app/mail_service.py` pour retirer l'appel a `smtp.login(...)`.
-
 ## Lancement du webservice
 
-```bash
+```powershell
 uvicorn app.main:app --host 0.0.0.0 --port 8443
 ```
 
@@ -71,9 +59,9 @@ CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00
 ```
 
 ```bash
-curl -X POST http://localhost:8443/api/v1/mail \
-  -H "Content-Type: application/json" \
-  -d '{"adresse_mail": "destinataire@exemple.com", "client": "TP BLOCHON", "ev_id": "987654", "sympt_var": "Ligne A\nLigne B\nLigne C"}'
+curl -X POST http://localhost:8443/api/v1/mail ^
+  -H "Content-Type: application/json" ^
+  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\", \"ev_id\": \"987654\", \"sympt_var\": \"Ligne A\\nLigne B\\nLigne C\"}"
 ```
 
 En PowerShell :
@@ -125,9 +113,9 @@ Ligne B
 Ligne C
 ```
 
-Le message est envoye en `Content-Type: text/plain` (via
-`email.message.EmailMessage.set_content`), sans les problemes de fusion de
-lignes propres a l'automatisation Outlook.
+Chaque ligne du corps est jointe avec un retour a la ligne CRLF explicite
+(`\r\n`), pour eviter qu'Outlook ne fusionne des lignes consecutives lors
+de l'envoi en texte brut.
 
 Reponse en cas de succes :
 
@@ -135,9 +123,8 @@ Reponse en cas de succes :
 { "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00)" }
 ```
 
-En cas d'echec (configuration SMTP manquante, authentification refusee,
-serveur injoignable, etc.), le service renvoie un code HTTP 502 avec le
-detail de l'erreur.
+En cas d'echec (Outlook indisponible, non configure, etc.), le service
+renvoie un code HTTP 502 avec le detail de l'erreur.
 
 ## Verification de sante
 
