@@ -76,12 +76,19 @@ def send_mail(destinataire: str, titre: str, corps: str = "", timeout_seconds: i
     try:
         application = ensure_outlook_running(timeout_seconds=timeout_seconds)
         mail = application.CreateItem(OL_MAIL_ITEM)
-        mail.BodyFormat = OL_FORMAT_PLAIN  # force le mode texte brut (pas de HTML)
+        # L'ordre compte : positionner To puis Subject avant BodyFormat.
+        # Outlook peut re-appliquer le format "prefere" du destinataire
+        # (carnet d'adresses/GAL) au moment ou le destinataire est resolu,
+        # ce qui ecraserait un BodyFormat pose trop tot.
         mail.To = destinataire
         mail.Subject = titre
+        mail.BodyFormat = OL_FORMAT_PLAIN  # force le mode texte brut (pas de HTML)
         # Normalise les retours a la ligne en CRLF : un simple LF peut etre
         # aplati par Outlook lors de l'envoi en texte brut.
         mail.Body = corps.replace("\r\n", "\n").replace("\n", "\r\n")
+        # Reaffirme le format juste avant l'envoi, au cas ou la resolution
+        # du destinataire l'aurait de nouveau modifie.
+        mail.BodyFormat = OL_FORMAT_PLAIN
         mail.Send()
         logger.info("Mail envoye a %s avec le titre '%s'.", destinataire, titre)
     except com_error as exc:

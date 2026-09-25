@@ -15,6 +15,13 @@ Pre-requis :
   cette case. Sans cela, Outlook fusionne automatiquement les lignes du
   corps du message qui ne sont pas separees par une ligne vide (comportement
   natif d'Outlook, independant de ce webservice).
+- Sur le poste qui ENVOIE (celui qui execute le webservice), si le mail
+  part malgre tout en HTML/RTF au lieu du texte brut, verifier dans Outlook :
+  Fichier > Options > Courrier > "Lors de l'envoi de messages a un
+  destinataire Exchange, toujours utiliser mon format par defaut au lieu du
+  format du destinataire" > cocher cette case. Outlook peut en effet
+  reprendre le format prefere du destinataire (carnet d'adresses/Exchange)
+  et l'imposer malgre le format texte brut demande par le webservice.
 
 ## Installation
 
