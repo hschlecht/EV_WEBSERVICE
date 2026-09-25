@@ -19,8 +19,7 @@ app = FastAPI(title="EV Webservice - Outlook Mailer")
 
 class MailRequest(BaseModel):
     adresse_mail: EmailStr = Field(..., description="Adresse mail du destinataire")
-    client: str = Field(..., min_length=1, description="Nom du client (VAR_1 du titre)")
-    corps_message: str = Field("", description="Corps du message (optionnel)")
+    client: str = Field(..., min_length=1, description="Nom du client (VAR_1 du titre et du corps)")
 
 
 class MailResponse(BaseModel):
@@ -33,14 +32,37 @@ def construire_titre(client: str) -> str:
     return f"CASE OPENNING - {client} - {horodatage}"
 
 
+CORPS_MODELE = """Centre_de_services=CDS-008
+Service= CDSCAEN0017
+Demandeur=28508
+Client= {client}
+Adresse_site= {client}
+Equipe=EQ-0154
+Intervenant=
+ORIGINE=EVENEMENT
+Dossier_interne=Supervision EvObserve - TRANSPORT BLOCHON MARTIN - BARIAU LECLERC
+impact= 2 - Moyen / Medium
+urgence=2 - Moyenne / Medium
+Libelle=Incident Supervision – EvObserve ID
+Symptome=Ligne 1
+Ligne 2
+Ligne 3
+Ligne 4"""
+
+
+def construire_corps(client: str) -> str:
+    return CORPS_MODELE.format(client=client)
+
+
 @app.post("/api/v1/mail", response_model=MailResponse)
 def envoyer_mail(requete: MailRequest) -> MailResponse:
     titre = construire_titre(requete.client)
+    corps = construire_corps(requete.client)
     try:
         send_mail(
             destinataire=requete.adresse_mail,
             titre=titre,
-            corps=requete.corps_message,
+            corps=corps,
         )
     except OutlookError as exc:
         logger.exception("Echec de l'envoi du mail")

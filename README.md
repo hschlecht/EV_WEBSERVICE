@@ -61,14 +61,35 @@ Corps JSON attendu :
 ```json
 {
   "adresse_mail": "destinataire@exemple.com",
-  "client": "TP BLOCHON",
-  "corps_message": "Texte optionnel du mail"
+  "client": "TP BLOCHON"
 }
 ```
 
 - `adresse_mail` (obligatoire) : adresse mail du destinataire.
-- `client` (obligatoire) : nom du client, insere dans le titre genere.
-- `corps_message` (optionnel) : corps du mail, vide par defaut.
+- `client` (obligatoire) : nom du client, insere dans le titre et dans le corps genere.
+
+Le corps du mail est lui aussi genere automatiquement, sur le modele
+suivant (`Client` et `Adresse_site` sont remplaces par la valeur de
+`client`) :
+
+```
+Centre_de_services=CDS-008
+Service= CDSCAEN0017
+Demandeur=28508
+Client= TP BLOCHON
+Adresse_site= TP BLOCHON
+Equipe=EQ-0154
+Intervenant=
+ORIGINE=EVENEMENT
+Dossier_interne=Supervision EvObserve - TRANSPORT BLOCHON MARTIN - BARIAU LECLERC
+impact= 2 - Moyen / Medium
+urgence=2 - Moyenne / Medium
+Libelle=Incident Supervision – EvObserve ID    
+Symptome=Ligne 1
+Ligne 2
+Ligne 3
+Ligne 4
+```
 
 Reponse en cas de succes :
 
