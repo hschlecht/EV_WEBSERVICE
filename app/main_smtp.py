@@ -1,6 +1,8 @@
-"""Webservice FastAPI exposant l'envoi de mail via Outlook Desktop.
+"""Webservice FastAPI exposant l'envoi de mail via SMTP (sans Outlook).
 
-Lancement : uvicorn app.main:app --host 0.0.0.0 --port 8443
+Lancement : uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
+(utiliser un port different si ce webservice tourne en meme temps que
+app.main, qui ecoute par defaut lui aussi sur le port 8443)
 """
 
 import logging
@@ -8,18 +10,16 @@ import logging
 from fastapi import FastAPI, HTTPException
 
 from app.message_builder import MailRequest, MailResponse, construire_corps_lignes, construire_titre
-from app.outlook_service import OutlookError, send_mail
+from app.smtp_mail_service import MailError, send_mail
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ev_webservice")
+logger = logging.getLogger("ev_webservice_smtp")
 
-app = FastAPI(title="EV Webservice - Outlook Mailer")
+app = FastAPI(title="EV Webservice - SMTP Mailer")
 
 
 def construire_corps(client: str, ev_id: str, sympt_var: str) -> str:
-    # \r\n explicite : un simple \n peut etre "aplati" par Outlook (mode
-    # plain text "format=flowed"), ce qui fusionne des lignes consecutives.
-    return "\r\n".join(construire_corps_lignes(client, ev_id, sympt_var))
+    return "\n".join(construire_corps_lignes(client, ev_id, sympt_var))
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)
@@ -32,7 +32,7 @@ def envoyer_mail(requete: MailRequest) -> MailResponse:
             titre=titre,
             corps=corps,
         )
-    except OutlookError as exc:
+    except MailError as exc:
         logger.exception("Echec de l'envoi du mail")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
