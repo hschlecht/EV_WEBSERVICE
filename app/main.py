@@ -1,4 +1,4 @@
-"""Webservice FastAPI exposant l'envoi de mail via Outlook Desktop.
+"""Webservice FastAPI exposant l'envoi de mail via SMTP.
 
 Lancement : uvicorn app.main:app --host 0.0.0.0 --port 8443
 """
@@ -10,12 +10,12 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr, Field
 
-from app.outlook_service import OutlookError, send_mail
+from app.mail_service import MailError, send_mail
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ev_webservice")
 
-app = FastAPI(title="EV Webservice - Outlook Mailer")
+app = FastAPI(title="EV Webservice - Mailer")
 
 SEPARATEUR_LIGNES = re.compile(r"\r\n|\r|\n")
 
@@ -67,9 +67,7 @@ def construire_bloc_symptome(sympt_var: str) -> list[str]:
 def construire_corps(client: str, ev_id: str, sympt_var: str) -> str:
     lignes = [ligne.format(client=client, ev_id=ev_id) for ligne in CORPS_LIGNES]
     lignes.extend(construire_bloc_symptome(sympt_var))
-    # \r\n explicite : un simple \n peut etre "aplati" par Outlook (mode
-    # plain text "format=flowed"), ce qui fusionne des lignes consecutives.
-    return "\r\n".join(lignes)
+    return "\n".join(lignes)
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)
@@ -82,7 +80,7 @@ def envoyer_mail(requete: MailRequest) -> MailResponse:
             titre=titre,
             corps=corps,
         )
-    except OutlookError as exc:
+    except MailError as exc:
         logger.exception("Echec de l'envoi du mail")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
