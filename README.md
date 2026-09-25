@@ -51,7 +51,7 @@ CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00
 ```bash
 curl -X POST http://localhost:8443/api/v1/mail ^
   -H "Content-Type: application/json" ^
-  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\", \"ev_id\": \"987654\"}"
+  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\", \"ev_id\": \"987654\", \"sympt_var\": \"Ligne A\\nLigne B\\nLigne C\"}"
 ```
 
 En PowerShell :
@@ -59,7 +59,7 @@ En PowerShell :
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
   -ContentType "application/json" `
-  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON"; ev_id = "987654" } | ConvertTo-Json)
+  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON"; ev_id = "987654"; sympt_var = "Ligne A`nLigne B`nLigne C" } | ConvertTo-Json)
 ```
 
 Corps JSON attendu :
@@ -68,17 +68,22 @@ Corps JSON attendu :
 {
   "adresse_mail": "destinataire@exemple.com",
   "client": "TP BLOCHON",
-  "ev_id": "987654"
+  "ev_id": "987654",
+  "sympt_var": "Ligne A\nLigne B\nLigne C"
 }
 ```
 
 - `adresse_mail` (obligatoire) : adresse mail du destinataire.
 - `client` (obligatoire) : nom du client, insere dans le titre et dans le corps genere.
 - `ev_id` (obligatoire) : identifiant EvObserve, insere dans la ligne `Libelle` du corps.
+- `sympt_var` (obligatoire) : contenu de la ligne `Symptome`. Peut contenir
+  plusieurs lignes (separees par `\n` dans le JSON) : chaque ligne devient
+  une ligne distincte du corps, la premiere etant precedee de `Symptome=`.
 
 Le corps du mail est lui aussi genere automatiquement, sur le modele
 suivant (`Client`, `Adresse_site` et `Dossier_interne` sont remplaces par
-la valeur de `client`, et `ev_id` remplace `ID` dans `Libelle`) :
+la valeur de `client`, `ev_id` remplace `ID` dans `Libelle`, et `sympt_var`
+alimente `Symptome`) :
 
 ```
 Centre_de_services=CDS-008
@@ -93,10 +98,9 @@ Dossier_interne=Supervision EvObserve - TP BLOCHON
 impact= 2 - Moyen / Medium
 urgence=2 - Moyenne / Medium
 Libelle=Incident Supervision – EvObserve 987654
-Symptome=Ligne 1
-Ligne 2
-Ligne 3
-Ligne 4
+Symptome=Ligne A
+Ligne B
+Ligne C
 ```
 
 Chaque ligne du corps est jointe avec un retour a la ligne CRLF explicite
