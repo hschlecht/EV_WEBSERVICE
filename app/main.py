@@ -32,26 +32,27 @@ def construire_titre(client: str) -> str:
     return f"CASE OPENNING - {client} - {horodatage}"
 
 
-CORPS_MODELE = """Centre_de_services=CDS-008
-Service= CDSCAEN0017
-Demandeur=28508
-Client= {client}
-Adresse_site= {client}
-Equipe=EQ-0154
-Intervenant=
-ORIGINE=EVENEMENT
-Dossier_interne=Supervision EvObserve - TRANSPORT BLOCHON MARTIN - BARIAU LECLERC
-impact= 2 - Moyen / Medium
-urgence=2 - Moyenne / Medium
-Libelle=Incident Supervision – EvObserve ID
-Symptome=Ligne 1
-Ligne 2
-Ligne 3
-Ligne 4"""
+CORPS_LIGNES = [
+    "Centre_de_services=CDS-008",
+    "Service= CDSCAEN0017",
+    "Demandeur=28508",
+    "Client= {client}",
+    "Adresse_site= {client}",
+    "Equipe=EQ-0154",
+    "Intervenant=",
+    "ORIGINE=EVENEMENT",
+    "Dossier_interne=Supervision EvObserve - {client}",
+    "impact= 2 - Moyen / Medium",
+    "urgence=2 - Moyenne / Medium",
+    "Libelle=Incident Supervision – EvObserve ID",
+    "Symptome=Texte",
+]
 
 
 def construire_corps(client: str) -> str:
-    return CORPS_MODELE.format(client=client)
+    # \r\n explicite : un simple \n peut etre "aplati" par Outlook (mode
+    # plain text "format=flowed"), ce qui fusionne des lignes consecutives.
+    return "\r\n".join(ligne.format(client=client) for ligne in CORPS_LIGNES)
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)

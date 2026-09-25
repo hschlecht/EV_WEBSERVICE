@@ -79,7 +79,9 @@ def send_mail(destinataire: str, titre: str, corps: str = "", timeout_seconds: i
         mail.BodyFormat = OL_FORMAT_PLAIN  # force le mode texte brut (pas de HTML)
         mail.To = destinataire
         mail.Subject = titre
-        mail.Body = corps
+        # Normalise les retours a la ligne en CRLF : un simple LF peut etre
+        # aplati par Outlook lors de l'envoi en texte brut.
+        mail.Body = corps.replace("\r\n", "\n").replace("\n", "\r\n")
         mail.Send()
         logger.info("Mail envoye a %s avec le titre '%s'.", destinataire, titre)
     except com_error as exc:

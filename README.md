@@ -69,8 +69,8 @@ Corps JSON attendu :
 - `client` (obligatoire) : nom du client, insere dans le titre et dans le corps genere.
 
 Le corps du mail est lui aussi genere automatiquement, sur le modele
-suivant (`Client` et `Adresse_site` sont remplaces par la valeur de
-`client`) :
+suivant (`Client`, `Adresse_site` et `Dossier_interne` sont remplaces par
+la valeur de `client`) :
 
 ```
 Centre_de_services=CDS-008
@@ -81,15 +81,16 @@ Adresse_site= TP BLOCHON
 Equipe=EQ-0154
 Intervenant=
 ORIGINE=EVENEMENT
-Dossier_interne=Supervision EvObserve - TRANSPORT BLOCHON MARTIN - BARIAU LECLERC
+Dossier_interne=Supervision EvObserve - TP BLOCHON
 impact= 2 - Moyen / Medium
 urgence=2 - Moyenne / Medium
-Libelle=Incident Supervision – EvObserve ID    
-Symptome=Ligne 1
-Ligne 2
-Ligne 3
-Ligne 4
+Libelle=Incident Supervision – EvObserve ID
+Symptome=Texte
 ```
+
+Chaque ligne du corps est jointe avec un retour a la ligne CRLF explicite
+(`\r\n`), pour eviter qu'Outlook ne fusionne des lignes consecutives lors
+de l'envoi en texte brut.
 
 Reponse en cas de succes :
 
