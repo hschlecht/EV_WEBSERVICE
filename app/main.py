@@ -56,7 +56,11 @@ CORPS_LIGNES = [
 
 
 def construire_bloc_symptome(sympt_var: str) -> list[str]:
-    premiere, *suite = SEPARATEUR_LIGNES.split(sympt_var)
+    # Certains clients (formulaire, Swagger...) envoient la sequence
+    # litterale antislash+n plutot qu'un vrai caractere de retour a la
+    # ligne : on la normalise avant de decouper.
+    normalise = sympt_var.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\r", "\n")
+    premiere, *suite = SEPARATEUR_LIGNES.split(normalise)
     return [f"Symptome={premiere}", *suite]
 
 
