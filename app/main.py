@@ -45,7 +45,10 @@ CORPS_LIGNES = [
     "impact= 2 - Moyen / Medium",
     "urgence=2 - Moyenne / Medium",
     "Libelle=Incident Supervision – EvObserve ID",
-    "Symptome=Texte",
+    "Symptome=Ligne 1",
+    "Ligne 2",
+    "Ligne 3",
+    "Ligne 4",
 ]
 
 

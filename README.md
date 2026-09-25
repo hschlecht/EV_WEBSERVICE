@@ -85,7 +85,10 @@ Dossier_interne=Supervision EvObserve - TP BLOCHON
 impact= 2 - Moyen / Medium
 urgence=2 - Moyenne / Medium
 Libelle=Incident Supervision – EvObserve ID
-Symptome=Texte
+Symptome=Ligne 1
+Ligne 2
+Ligne 3
+Ligne 4
 ```
 
 Chaque ligne du corps est jointe avec un retour a la ligne CRLF explicite
