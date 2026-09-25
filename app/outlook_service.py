@@ -19,6 +19,13 @@ OUTLOOK_PROCESS_NAME = "OUTLOOK.EXE"
 OL_MAIL_ITEM = 0  # olMailItem
 OL_FORMAT_PLAIN = 1  # olFormatPlain
 
+# Propriete MAPI bas niveau PidTagMessageEditorFormat : c'est elle qui
+# determine reellement le format utilise a l'envoi (texte brut / HTML /
+# RTF), independamment de MailItem.BodyFormat qui peut etre reecrase par
+# l'editeur Word integre a Outlook. 1 = EDITOR_FORMAT_PLAINTEXT.
+PR_MESSAGE_EDITOR_FORMAT = "http://schemas.microsoft.com/mapi/proptag/0x59090003"
+EDITOR_FORMAT_PLAINTEXT = 1
+
 
 class OutlookError(RuntimeError):
     """Erreur remontee lorsque Outlook ne peut pas etre demarre ou pilote."""
@@ -89,6 +96,10 @@ def send_mail(destinataire: str, titre: str, corps: str = "", timeout_seconds: i
         # Reaffirme le format juste avant l'envoi, au cas ou la resolution
         # du destinataire l'aurait de nouveau modifie.
         mail.BodyFormat = OL_FORMAT_PLAIN
+        # BodyFormat seul n'est pas toujours suffisant (l'editeur Word
+        # integre a Outlook peut le reecraser) : on force aussi la
+        # propriete MAPI bas niveau qui pilote le format reellement envoye.
+        mail.PropertyAccessor.SetProperty(PR_MESSAGE_EDITOR_FORMAT, EDITOR_FORMAT_PLAINTEXT)
         mail.Send()
         logger.info("Mail envoye a %s avec le titre '%s'.", destinataire, titre)
     except com_error as exc:

@@ -22,6 +22,9 @@ Pre-requis :
   format du destinataire" > cocher cette case. Outlook peut en effet
   reprendre le format prefere du destinataire (carnet d'adresses/Exchange)
   et l'imposer malgre le format texte brut demande par le webservice.
+  Le webservice force aussi ce format directement via la propriete MAPI
+  `PidTagMessageEditorFormat`, plus fiable que la seule propriete
+  `BodyFormat` (voir `app/outlook_service.py`).
 
 ## Installation
 
