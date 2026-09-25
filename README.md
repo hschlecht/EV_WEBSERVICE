@@ -51,7 +51,7 @@ CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00
 ```bash
 curl -X POST http://localhost:8443/api/v1/mail ^
   -H "Content-Type: application/json" ^
-  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\"}"
+  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\", \"ev_id\": \"987654\"}"
 ```
 
 En PowerShell :
@@ -59,7 +59,7 @@ En PowerShell :
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
   -ContentType "application/json" `
-  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON" } | ConvertTo-Json)
+  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON"; ev_id = "987654" } | ConvertTo-Json)
 ```
 
 Corps JSON attendu :
@@ -67,16 +67,18 @@ Corps JSON attendu :
 ```json
 {
   "adresse_mail": "destinataire@exemple.com",
-  "client": "TP BLOCHON"
+  "client": "TP BLOCHON",
+  "ev_id": "987654"
 }
 ```
 
 - `adresse_mail` (obligatoire) : adresse mail du destinataire.
 - `client` (obligatoire) : nom du client, insere dans le titre et dans le corps genere.
+- `ev_id` (obligatoire) : identifiant EvObserve, insere dans la ligne `Libelle` du corps.
 
 Le corps du mail est lui aussi genere automatiquement, sur le modele
 suivant (`Client`, `Adresse_site` et `Dossier_interne` sont remplaces par
-la valeur de `client`) :
+la valeur de `client`, et `ev_id` remplace `ID` dans `Libelle`) :
 
 ```
 Centre_de_services=CDS-008
@@ -90,7 +92,7 @@ ORIGINE=EVENEMENT
 Dossier_interne=Supervision EvObserve - TP BLOCHON
 impact= 2 - Moyen / Medium
 urgence=2 - Moyenne / Medium
-Libelle=Incident Supervision – EvObserve ID
+Libelle=Incident Supervision – EvObserve 987654
 Symptome=Ligne 1
 Ligne 2
 Ligne 3

@@ -20,6 +20,7 @@ app = FastAPI(title="EV Webservice - Outlook Mailer")
 class MailRequest(BaseModel):
     adresse_mail: EmailStr = Field(..., description="Adresse mail du destinataire")
     client: str = Field(..., min_length=1, description="Nom du client (VAR_1 du titre et du corps)")
+    ev_id: str = Field(..., min_length=1, description="Identifiant EvObserve (remplace ID dans Libelle)")
 
 
 class MailResponse(BaseModel):
@@ -44,7 +45,7 @@ CORPS_LIGNES = [
     "Dossier_interne=Supervision EvObserve - {client}",
     "impact= 2 - Moyen / Medium",
     "urgence=2 - Moyenne / Medium",
-    "Libelle=Incident Supervision – EvObserve ID",
+    "Libelle=Incident Supervision – EvObserve {ev_id}",
     "Symptome=Ligne 1",
     "Ligne 2",
     "Ligne 3",
@@ -52,16 +53,16 @@ CORPS_LIGNES = [
 ]
 
 
-def construire_corps(client: str) -> str:
+def construire_corps(client: str, ev_id: str) -> str:
     # \r\n explicite : un simple \n peut etre "aplati" par Outlook (mode
     # plain text "format=flowed"), ce qui fusionne des lignes consecutives.
-    return "\r\n".join(ligne.format(client=client) for ligne in CORPS_LIGNES)
+    return "\r\n".join(ligne.format(client=client, ev_id=ev_id) for ligne in CORPS_LIGNES)
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)
 def envoyer_mail(requete: MailRequest) -> MailResponse:
     titre = construire_titre(requete.client)
-    corps = construire_corps(requete.client)
+    corps = construire_corps(requete.client, requete.ev_id)
     try:
         send_mail(
             destinataire=requete.adresse_mail,
