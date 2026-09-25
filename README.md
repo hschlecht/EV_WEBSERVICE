@@ -29,10 +29,23 @@ Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
 
 ## Envoyer un mail (POST)
 
+Le titre (objet) du mail est genere automatiquement par le webservice au
+format :
+
+```
+CASE OPENNING - <CLIENT> - JJ/MM/AAAA HH:MM:SS
+```
+
+Exemple pour le client `TP BLOCHON` le 26/09/2026 a 15:38:00 :
+
+```
+CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00
+```
+
 ```bash
 curl -X POST http://localhost:8443/api/v1/mail ^
   -H "Content-Type: application/json" ^
-  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"titre_message\": \"Mon titre de message\"}"
+  -d "{\"adresse_mail\": \"destinataire@exemple.com\", \"client\": \"TP BLOCHON\"}"
 ```
 
 En PowerShell :
@@ -40,7 +53,7 @@ En PowerShell :
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
   -ContentType "application/json" `
-  -Body (@{ adresse_mail = "destinataire@exemple.com"; titre_message = "Mon titre de message" } | ConvertTo-Json)
+  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON" } | ConvertTo-Json)
 ```
 
 Corps JSON attendu :
@@ -48,19 +61,19 @@ Corps JSON attendu :
 ```json
 {
   "adresse_mail": "destinataire@exemple.com",
-  "titre_message": "Mon titre de message",
+  "client": "TP BLOCHON",
   "corps_message": "Texte optionnel du mail"
 }
 ```
 
 - `adresse_mail` (obligatoire) : adresse mail du destinataire.
-- `titre_message` (obligatoire) : objet du mail.
+- `client` (obligatoire) : nom du client, insere dans le titre genere.
 - `corps_message` (optionnel) : corps du mail, vide par defaut.
 
 Reponse en cas de succes :
 
 ```json
-{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com" }
+{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00)" }
 ```
 
 En cas d'echec (Outlook indisponible, non configure, etc.), le service

@@ -4,6 +4,7 @@ Lancement : uvicorn app.main:app --host 0.0.0.0 --port 8443
 """
 
 import logging
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr, Field
@@ -18,7 +19,7 @@ app = FastAPI(title="EV Webservice - Outlook Mailer")
 
 class MailRequest(BaseModel):
     adresse_mail: EmailStr = Field(..., description="Adresse mail du destinataire")
-    titre_message: str = Field(..., min_length=1, description="Titre (objet) du message")
+    client: str = Field(..., min_length=1, description="Nom du client (VAR_1 du titre)")
     corps_message: str = Field("", description="Corps du message (optionnel)")
 
 
@@ -27,19 +28,25 @@ class MailResponse(BaseModel):
     message: str
 
 
+def construire_titre(client: str) -> str:
+    horodatage = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    return f"CASE OPENNING - {client} - {horodatage}"
+
+
 @app.post("/api/v1/mail", response_model=MailResponse)
 def envoyer_mail(requete: MailRequest) -> MailResponse:
+    titre = construire_titre(requete.client)
     try:
         send_mail(
             destinataire=requete.adresse_mail,
-            titre=requete.titre_message,
+            titre=titre,
             corps=requete.corps_message,
         )
     except OutlookError as exc:
         logger.exception("Echec de l'envoi du mail")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-    return MailResponse(statut="ok", message=f"Mail envoye a {requete.adresse_mail}")
+    return MailResponse(statut="ok", message=f"Mail envoye a {requete.adresse_mail} (titre: {titre})")
 
 
 @app.get("/api/v1/health")
