@@ -82,9 +82,11 @@ Equipe=EQ-0154
 Intervenant=
 ORIGINE=EVENEMENT
 Dossier_interne=Supervision EvObserve - TP BLOCHON
+
 impact= 2 - Moyen / Medium
 urgence=2 - Moyenne / Medium
 Libelle=Incident Supervision – EvObserve ID
+
 Symptome=Texte
 ```
 

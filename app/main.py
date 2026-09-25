@@ -42,9 +42,11 @@ CORPS_LIGNES = [
     "Intervenant=",
     "ORIGINE=EVENEMENT",
     "Dossier_interne=Supervision EvObserve - {client}",
+    "",
     "impact= 2 - Moyen / Medium",
     "urgence=2 - Moyenne / Medium",
     "Libelle=Incident Supervision – EvObserve ID",
+    "",
     "Symptome=Texte",
 ]
 
