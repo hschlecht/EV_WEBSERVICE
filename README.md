@@ -9,6 +9,12 @@ Pre-requis :
 - Windows avec Microsoft Outlook Desktop installe et configure (un compte de
   messagerie doit deja etre configure dans Outlook).
 - Python 3.10+.
+- Sur le(s) poste(s) qui LISENT le mail recu (le compte destinataire), il
+  faut desactiver l'option Outlook "Supprimer les sauts de ligne superflus
+  dans les messages en texte brut" : Fichier > Options > Courrier > decocher
+  cette case. Sans cela, Outlook fusionne automatiquement les lignes du
+  corps du message qui ne sont pas separees par une ligne vide (comportement
+  natif d'Outlook, independant de ce webservice).
 
 ## Installation
 
