@@ -17,6 +17,7 @@ logger = logging.getLogger("outlook_service")
 
 OUTLOOK_PROCESS_NAME = "OUTLOOK.EXE"
 OL_MAIL_ITEM = 0  # olMailItem
+OL_FORMAT_PLAIN = 1  # olFormatPlain
 
 
 class OutlookError(RuntimeError):
@@ -75,6 +76,7 @@ def send_mail(destinataire: str, titre: str, corps: str = "", timeout_seconds: i
     try:
         application = ensure_outlook_running(timeout_seconds=timeout_seconds)
         mail = application.CreateItem(OL_MAIL_ITEM)
+        mail.BodyFormat = OL_FORMAT_PLAIN  # force le mode texte brut (pas de HTML)
         mail.To = destinataire
         mail.Subject = titre
         mail.Body = corps
