@@ -30,7 +30,7 @@ def construire_corps(requete: MailRequest) -> str:
         var_libelle=requete.var_libelle,
         var_symptome=requete.var_symptome,
     )
-    return "\n".join(lignes)
+    return "\r\n".join(lignes)
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)
