@@ -59,25 +59,35 @@ uvicorn app.main:app --host 0.0.0.0 --port 8443
 
 ## Option B - Webservice SMTP (`app.main_smtp`)
 
-Envoie le mail directement par SMTP (Office 365 / Exchange Online par
-defaut), sans passer par Outlook.
-
-Pre-requis : un compte SMTP capable d'envoyer des mails, avec ses
-identifiants.
+Envoie le mail directement par SMTP. Par defaut, aucune authentification
+ni TLS n'est utilisee (cas d'un relai SMTP interne, souvent sur le port
+25) ; l'authentification (avec STARTTLS) reste disponible si le serveur
+en a besoin (ex: Office 365 / Exchange Online).
 
 Configuration (variables d'environnement) :
 
-| Variable        | Obligatoire | Defaut                 | Description                                 |
-|------------------|:-----------:|-------------------------|------------------------------------------------|
-| `SMTP_HOST`      | non         | `smtp.office365.com`    | Serveur SMTP                                    |
-| `SMTP_PORT`      | non         | `587`                   | Port SMTP (STARTTLS)                            |
-| `SMTP_USER`      | **oui**     | -                        | Compte utilise pour l'authentification SMTP     |
-| `SMTP_PASSWORD`  | **oui**     | -                        | Mot de passe (ou mot de passe applicatif)       |
-| `SMTP_FROM`      | non         | valeur de `SMTP_USER`   | Adresse d'expedition affichee                   |
+| Variable        | Obligatoire | Defaut  | Description                                                        |
+|------------------|:-----------:|----------|----------------------------------------------------------------------|
+| `SMTP_HOST`      | **oui**     | -        | Serveur/relai SMTP                                                    |
+| `SMTP_PORT`      | non         | `25`     | Port SMTP                                                             |
+| `SMTP_FROM`      | **oui**\*   | -        | Adresse d'expedition (\*= facultatif si `SMTP_USER` est defini)       |
+| `SMTP_USE_TLS`   | non         | `false`  | `true` pour utiliser STARTTLS avant l'envoi                           |
+| `SMTP_USER`      | non         | -        | Compte pour l'authentification SMTP (omis = pas d'authentification)  |
+| `SMTP_PASSWORD`  | non\*\*     | -        | Mot de passe (\*\*= obligatoire si `SMTP_USER` est defini)            |
 
-Exemple (Linux/macOS) :
+Relai interne sans authentification (cas le plus courant en entreprise) :
 
 ```bash
+export SMTP_HOST="relai-smtp.monentreprise.local"
+export SMTP_FROM="service@monentreprise.com"
+```
+
+Serveur avec authentification (ex. Office 365) :
+
+```bash
+export SMTP_HOST="smtp.office365.com"
+export SMTP_PORT="587"
+export SMTP_USE_TLS="true"
 export SMTP_USER="moi@monentreprise.com"
 export SMTP_PASSWORD="mot-de-passe-applicatif"
 ```
@@ -85,12 +95,9 @@ export SMTP_PASSWORD="mot-de-passe-applicatif"
 Exemple (PowerShell) :
 
 ```powershell
-$env:SMTP_USER = "moi@monentreprise.com"
-$env:SMTP_PASSWORD = "mot-de-passe-applicatif"
+$env:SMTP_HOST = "relai-smtp.monentreprise.local"
+$env:SMTP_FROM = "service@monentreprise.com"
 ```
-
-Si le serveur SMTP est un relai interne sans authentification, adapter
-`app/smtp_mail_service.py` pour retirer l'appel a `smtp.login(...)`.
 
 Lancement :
 
