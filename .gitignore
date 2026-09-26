@@ -2,4 +2,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
 config.env
