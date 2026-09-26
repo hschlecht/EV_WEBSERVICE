@@ -4,6 +4,11 @@ Ne depend pas d'Outlook : le message part directement par SMTP. Pense a un
 relai SMTP interne sans authentification par defaut (port 25, pas de
 TLS) ; l'authentification et le TLS restent disponibles si le serveur en
 a besoin.
+
+La configuration peut venir de variables d'environnement classiques et/ou
+d'un fichier config.env a la racine du projet (voir app/config.py et
+config.env.example) : une variable d'environnement deja definie reste
+prioritaire sur le fichier.
 """
 
 from __future__ import annotations
@@ -11,6 +16,10 @@ from __future__ import annotations
 import os
 import smtplib
 from email.message import EmailMessage
+
+from app.config import charger_fichier_config
+
+charger_fichier_config()
 
 
 def _lire_booleen(nom: str, defaut: bool) -> bool:

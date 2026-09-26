@@ -99,6 +99,27 @@ $env:SMTP_HOST = "relai-smtp.monentreprise.local"
 $env:SMTP_FROM = "service@monentreprise.com"
 ```
 
+### Alternative : fichier de configuration `config.env`
+
+Plutot que des variables d'environnement, ces valeurs peuvent etre
+declarees dans un fichier `config.env` a la racine du projet (charge
+automatiquement au demarrage, voir `app/config.py`) :
+
+```bash
+cp config.env.example config.env
+```
+
+Puis editer `config.env` :
+
+```
+SMTP_HOST=relai-smtp.monentreprise.local
+SMTP_FROM=service@monentreprise.com
+```
+
+`config.env` est ignore par git (voir `.gitignore`) : il ne sera jamais
+commite. Une variable d'environnement deja definie avant le lancement du
+webservice reste prioritaire sur le contenu de ce fichier.
+
 Lancement :
 
 ```bash
