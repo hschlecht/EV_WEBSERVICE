@@ -80,4 +80,4 @@ def construire_corps_lignes(
         for ligne in CORPS_LIGNES
     ]
     lignes.extend(construire_bloc_symptome(var_symptome))
-    return lignes
+    return ["", *lignes]
