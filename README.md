@@ -1,8 +1,9 @@
 # EV Webservice - Mailer
 
 Deux webservices independants, au meme contrat d'API (`POST /api/v1/mail`),
-pour envoyer un mail texte brut a partir d'un client, d'un identifiant
-EvObserve et d'un symptome :
+pour envoyer un mail texte brut dont le corps est construit dynamiquement
+a partir de variables (centre de services, service, demandeur, client,
+adresse, libelle, symptome) :
 
 - **`app.main`** : pilote le client **Outlook Desktop** installe sur le
   poste (Windows uniquement) via COM/pywin32.
@@ -141,19 +142,13 @@ Contrat identique pour les deux webservices. Le titre (objet) du mail est
 genere automatiquement au format :
 
 ```
-CASE OPENNING - <CLIENT> - JJ/MM/AAAA HH:MM:SS
-```
-
-Exemple pour le client `TP BLOCHON` le 26/09/2026 a 15:38:00 :
-
-```
-CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00
+CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
 ```
 
 ```bash
 curl -X POST http://localhost:8443/api/v1/mail \
   -H "Content-Type: application/json" \
-  -d '{"adresse_mail": "destinataire@exemple.com", "client": "TP BLOCHON", "ev_id": "987654", "sympt_var": "Ligne A\nLigne B\nLigne C"}'
+  -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-008", "var_service": "CDSCAEN0393", "var_demandeur": "66502", "var_client": "GIP LABEO [GIP LABEO]", "var_adresse": "GIP LABEO [GIP LABEO]", "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026", "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"}'
 ```
 
 En PowerShell :
@@ -161,7 +156,16 @@ En PowerShell :
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
   -ContentType "application/json" `
-  -Body (@{ adresse_mail = "destinataire@exemple.com"; client = "TP BLOCHON"; ev_id = "987654"; sympt_var = "Ligne A`nLigne B`nLigne C" } | ConvertTo-Json)
+  -Body (@{
+    adresse_mail = "destinataire@exemple.com"
+    var_cds = "CDS-008"
+    var_service = "CDSCAEN0393"
+    var_demandeur = "66502"
+    var_client = "GIP LABEO [GIP LABEO]"
+    var_adresse = "GIP LABEO [GIP LABEO]"
+    var_libelle = "LABEO Morning check - 2026/39 - 24-09-2026"
+    var_symptome = "LABEO Morning check - 2026/39 - 24-09-2026"
+  } | ConvertTo-Json)
 ```
 
 Corps JSON attendu :
@@ -169,46 +173,53 @@ Corps JSON attendu :
 ```json
 {
   "adresse_mail": "destinataire@exemple.com",
-  "client": "TP BLOCHON",
-  "ev_id": "987654",
-  "sympt_var": "Ligne A\nLigne B\nLigne C"
+  "var_cds": "CDS-008",
+  "var_service": "CDSCAEN0393",
+  "var_demandeur": "66502",
+  "var_client": "GIP LABEO [GIP LABEO]",
+  "var_adresse": "GIP LABEO [GIP LABEO]",
+  "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026",
+  "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"
 }
 ```
 
 - `adresse_mail` (obligatoire) : adresse mail du destinataire.
-- `client` (obligatoire) : nom du client, insere dans le titre et dans le corps genere.
-- `ev_id` (obligatoire) : identifiant EvObserve, insere dans la ligne `Libelle` du corps.
-- `sympt_var` (obligatoire) : contenu de la ligne `Symptome`. Peut contenir
+- `var_cds` (obligatoire) : alimente `Centre_de_services`.
+- `var_service` (obligatoire) : alimente `Service`.
+- `var_demandeur` (obligatoire) : alimente `Demandeur`.
+- `var_client` (obligatoire) : alimente `Client`, et le titre du mail.
+- `var_adresse` (obligatoire) : alimente `Adresse_site`.
+- `var_libelle` (obligatoire) : alimente `Libelle`.
+- `var_symptome` (obligatoire) : alimente `Symptome`. Peut contenir
   plusieurs lignes (separees par `\n` dans le JSON) : chaque ligne devient
   une ligne distincte du corps, la premiere etant precedee de `Symptome=`.
 
-Le corps du mail est lui aussi genere automatiquement, sur le modele
-suivant (`Client`, `Adresse_site` et `Dossier_interne` sont remplaces par
-la valeur de `client`, `ev_id` remplace `ID` dans `Libelle`, et `sympt_var`
-alimente `Symptome`) :
+`Equipe`, `Intervenant`, `ORIGINE`, `Dossier_interne`, `impact` et
+`urgence` restent des valeurs fixes dans le corps genere (non
+parametrables pour l'instant).
+
+Le corps du mail est genere automatiquement, sur le modele suivant :
 
 ```
 Centre_de_services=CDS-008
-Service= CDSCAEN0017
-Demandeur=28508
-Client= TP BLOCHON
-Adresse_site= TP BLOCHON
+Service=CDSCAEN0393
+Demandeur=66502
+Client=GIP LABEO [GIP LABEO]
+Adresse_site=GIP LABEO [GIP LABEO]
 Equipe=EQ-0154
 Intervenant=
-ORIGINE=EVENEMENT
-Dossier_interne=Supervision EvObserve - TP BLOCHON
-impact= 2 - Moyen / Medium
-urgence=2 - Moyenne / Medium
-Libelle=Incident Supervision – EvObserve 987654
-Symptome=Ligne A
-Ligne B
-Ligne C
+ORIGINE=EMAIL
+Dossier_interne=06ad802324a87214306c3b04d9acf7747fdf86af
+impact=1 - Faible / Low
+urgence=1 - Faible / Low
+Libelle=LABEO Morning check - 2026/39 - 24-09-2026
+Symptome=LABEO Morning check - 2026/39 - 24-09-2026
 ```
 
 Reponse en cas de succes :
 
 ```json
-{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - TP BLOCHON - 26/09/2026 15:38:00)" }
+{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - GIP LABEO [GIP LABEO] - 26/09/2026 06:13:21)" }
 ```
 
 En cas d'echec (Outlook indisponible/non configure pour `app.main`,

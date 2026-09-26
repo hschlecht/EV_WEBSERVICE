@@ -18,14 +18,23 @@ logger = logging.getLogger("ev_webservice_smtp")
 app = FastAPI(title="EV Webservice - SMTP Mailer")
 
 
-def construire_corps(client: str, ev_id: str, sympt_var: str) -> str:
-    return "\n".join(construire_corps_lignes(client, ev_id, sympt_var))
+def construire_corps(requete: MailRequest) -> str:
+    lignes = construire_corps_lignes(
+        var_cds=requete.var_cds,
+        var_service=requete.var_service,
+        var_demandeur=requete.var_demandeur,
+        var_client=requete.var_client,
+        var_adresse=requete.var_adresse,
+        var_libelle=requete.var_libelle,
+        var_symptome=requete.var_symptome,
+    )
+    return "\n".join(lignes)
 
 
 @app.post("/api/v1/mail", response_model=MailResponse)
 def envoyer_mail(requete: MailRequest) -> MailResponse:
-    titre = construire_titre(requete.client)
-    corps = construire_corps(requete.client, requete.ev_id, requete.sympt_var)
+    titre = construire_titre(requete.var_client)
+    corps = construire_corps(requete)
     try:
         send_mail(
             destinataire=requete.adresse_mail,
