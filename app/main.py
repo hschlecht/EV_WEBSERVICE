@@ -35,6 +35,8 @@ def construire_corps(requete: MailRequest) -> str:
 def envoyer_mail(requete: MailRequest) -> MailResponse:
     titre = construire_titre(requete.var_client)
     corps = construire_corps(requete)
+    logger.info("Titre du message :\n%s", titre)
+    logger.info("Corps du message (brut) avant envoi :\n%s", corps)
     try:
         send_mail(
             destinataire=requete.adresse_mail,
