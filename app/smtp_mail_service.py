@@ -26,6 +26,7 @@ prioritaire sur le fichier.
 from __future__ import annotations
 
 import os
+import secrets
 import smtplib
 
 from app.config import charger_fichier_config
@@ -75,13 +76,26 @@ def send_mail(destinataire: str, titre: str, corps: str = "") -> None:
             "pour l'adresse d'expedition."
         )
 
+    # Message MIME multipart construit "a la main" (pas de email.mime),
+    # pour reproduire exactement le formatage d'un message de reference
+    # traite correctement par le systeme receveur : un unique sous-bloc
+    # text/plain us-ascii/7bit, sans l'en-tete MIME-Version supplementaire
+    # qu'ajouterait automatiquement email.mime.text.MIMEText sur ce
+    # sous-bloc.
+    limite = "===============" + secrets.token_hex(16) + "=="
     message = (
         f"Subject: {titre}\r\n"
         f"Cc: {SMTP_CC}\r\n"
+        "MIME-Version: 1.0\r\n"
+        f'Content-Type: multipart/mixed; boundary="{limite}"\r\n'
+        "\r\n"
+        f"--{limite}\r\n"
         'Content-Type: text/plain; charset="us-ascii"\r\n'
         "Content-Transfer-Encoding: 7bit\r\n"
         "\r\n"
         f"{corps}\r\n"
+        "\r\n"
+        f"--{limite}--\r\n"
     )
     destinataires = [destinataire, SMTP_CC]
 
