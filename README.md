@@ -95,7 +95,7 @@ pour un systeme qui attend du texte brut `cle=valeur`.
 Le titre (objet) du mail est genere automatiquement au format :
 
 ```
-CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
+[AXIANS] CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
 ```
 
 ```bash
@@ -174,7 +174,7 @@ Symptome=LABEO Morning check - 2026/39 - 24-09-2026
 Reponse en cas de succes :
 
 ```json
-{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - GIP LABEO [GIP LABEO] - 26/09/2026 06:13:21)" }
+{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: [AXIANS] CASE OPENNING - GIP LABEO [GIP LABEO] - 26/09/2026 06:13:21)" }
 ```
 
 En cas d'echec (configuration SMTP manquante, serveur injoignable,

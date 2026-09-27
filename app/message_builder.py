@@ -30,7 +30,7 @@ class MailResponse(BaseModel):
 
 def construire_titre(var_client: str) -> str:
     horodatage = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    return f"CASE OPENNING - {var_client} - {horodatage}"
+    return f"[AXIANS] CASE OPENNING - {var_client} - {horodatage}"
 
 
 CORPS_LIGNES = [
