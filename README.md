@@ -84,11 +84,18 @@ uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
 
 Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
 `/api/v1/mail`. Le message est construit manuellement en texte brut minimal
-(`Subject: ...` puis une ligne vide puis le corps) et envoye tel quel via
-`smtplib.sendmail()` : volontairement pas de `email.message.EmailMessage`,
-dont l'encodage MIME automatique (quoted-printable/base64 des qu'un
-caractere accentue apparait dans le corps) rendrait le corps illisible
-pour un systeme qui attend du texte brut `cle=valeur`.
+(`Subject:`, `Cc:`, `Content-Type: text/plain; charset="us-ascii"`,
+`Content-Transfer-Encoding: 7bit`, une ligne vide, puis le corps) et
+envoye tel quel via `smtplib.sendmail()` : volontairement pas de
+`email.message.EmailMessage`, dont l'encodage MIME automatique
+(quoted-printable/base64 des qu'un caractere accentue apparait dans le
+corps) rendrait le corps illisible pour un systeme qui attend du texte
+brut `cle=valeur`. Les en-tetes `Content-Type`/`Content-Transfer-Encoding`
+sont alignes sur un message de reference traite correctement par le
+systeme receveur ; en consequence, **le titre et le corps doivent rester
+strictement en ASCII** (pas d'accent, pas de tiret demi-cadratin `–`) —
+un caractere non-ASCII fait echouer l'envoi avec une erreur explicite
+plutot que de produire un message mal forme.
 
 ## Envoyer un mail (POST /api/v1/mail)
 

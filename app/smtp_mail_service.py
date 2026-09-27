@@ -75,8 +75,27 @@ def send_mail(destinataire: str, titre: str, corps: str = "") -> None:
             "pour l'adresse d'expedition."
         )
 
-    message = f"Subject: {titre}\r\nCc: {SMTP_CC}\r\n\r\n{corps}\r\n"
+    message = (
+        f"Subject: {titre}\r\n"
+        f"Cc: {SMTP_CC}\r\n"
+        'Content-Type: text/plain; charset="us-ascii"\r\n'
+        "Content-Transfer-Encoding: 7bit\r\n"
+        "\r\n"
+        f"{corps}\r\n"
+    )
     destinataires = [destinataire, SMTP_CC]
+
+    try:
+        # Encodage ASCII strict : coherent avec l'en-tete Content-Type
+        # us-ascii/7bit ci-dessus (aligne sur un message de reference traite
+        # correctement par le systeme receveur).
+        message_octets = message.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise MailError(
+            "Le titre ou le corps du message contient un caractere non-ASCII "
+            f"(accent, tiret demi-cadratin...), incompatible avec l'en-tete "
+            f"'charset=us-ascii' impose : {exc}"
+        ) from exc
 
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as smtp:
@@ -85,9 +104,6 @@ def send_mail(destinataire: str, titre: str, corps: str = "") -> None:
                 smtp.starttls()
             if SMTP_USER and SMTP_PASSWORD:
                 smtp.login(SMTP_USER, SMTP_PASSWORD)
-            # Encode nous-memes en UTF-8 : envoyer un str obligerait
-            # smtplib a l'encoder en ASCII strict et a planter au premier
-            # caractere accentue.
-            smtp.sendmail(SMTP_FROM, destinataires, message.encode("utf-8"))
+            smtp.sendmail(SMTP_FROM, destinataires, message_octets)
     except (smtplib.SMTPException, OSError) as exc:
         raise MailError(f"Echec de l'envoi du mail via SMTP: {exc}") from exc
