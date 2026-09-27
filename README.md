@@ -83,8 +83,12 @@ uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
 ```
 
 Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
-`/api/v1/mail`. Le message est envoye en `Content-Type: text/plain` (via
-`email.message.EmailMessage.set_content`).
+`/api/v1/mail`. Le message est construit manuellement en texte brut minimal
+(`Subject: ...` puis une ligne vide puis le corps) et envoye tel quel via
+`smtplib.sendmail()` : volontairement pas de `email.message.EmailMessage`,
+dont l'encodage MIME automatique (quoted-printable/base64 des qu'un
+caractere accentue apparait dans le corps) rendrait le corps illisible
+pour un systeme qui attend du texte brut `cle=valeur`.
 
 ## Envoyer un mail (POST /api/v1/mail)
 
