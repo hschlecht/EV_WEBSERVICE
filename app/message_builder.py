@@ -17,6 +17,7 @@ class MailRequest(BaseModel):
     var_demandeur: str = Field(..., min_length=1, description="Demandeur")
     var_client: str = Field(..., min_length=1, description="Client (utilise aussi dans le titre)")
     var_adresse: str = Field(..., min_length=1, description="Adresse du site")
+    var_intervenant: str = Field("", description="Intervenant (optionnel, vide par defaut)")
     var_libelle: str = Field(..., min_length=1, description="Libelle")
     var_symptome: str = Field(
         ..., min_length=1, description="Contenu de Symptome (peut contenir plusieurs lignes, separees par \\n)"
@@ -40,7 +41,7 @@ CORPS_LIGNES = [
     "Client={var_client}",
     "Adresse_site={var_adresse}",
     "Equipe=EQ-0154",
-    "Intervenant=",
+    "Intervenant={var_intervenant}",
     "ORIGINE=EMAIL",
     "Dossier_interne=06ad802324a87214306c3b04d9acf7747fdf86af",
     "impact=1 - Faible / Low",
@@ -64,6 +65,7 @@ def construire_corps_lignes(
     var_demandeur: str,
     var_client: str,
     var_adresse: str,
+    var_intervenant: str,
     var_libelle: str,
     var_symptome: str,
 ) -> list[str]:
@@ -74,6 +76,7 @@ def construire_corps_lignes(
             var_demandeur=var_demandeur,
             var_client=var_client,
             var_adresse=var_adresse,
+            var_intervenant=var_intervenant,
             var_libelle=var_libelle,
         )
         for ligne in CORPS_LIGNES

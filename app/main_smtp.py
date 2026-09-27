@@ -25,6 +25,7 @@ def construire_corps(requete: MailRequest) -> str:
         var_demandeur=requete.var_demandeur,
         var_client=requete.var_client,
         var_adresse=requete.var_adresse,
+        var_intervenant=requete.var_intervenant,
         var_libelle=requete.var_libelle,
         var_symptome=requete.var_symptome,
     )
