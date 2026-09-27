@@ -1,18 +1,9 @@
 # EV Webservice - Mailer
 
-Deux webservices independants, au meme contrat d'API (`POST /api/v1/mail`),
-pour envoyer un mail texte brut dont le corps est construit dynamiquement
-a partir de variables (centre de services, service, demandeur, client,
-adresse, libelle, symptome) :
-
-- **`app.main`** : pilote le client **Outlook Desktop** installe sur le
-  poste (Windows uniquement) via COM/pywin32.
-- **`app.main_smtp`** : envoie directement par **SMTP**, avec la
-  bibliotheque standard Python (`smtplib` + `email`), sans dependance a
-  Outlook ni a un client de messagerie installe.
-
-La construction du titre et du corps du mail est partagee entre les deux
-(`app/message_builder.py`), seule la maniere d'envoyer differe.
+Webservice qui envoie un mail en texte brut directement par SMTP (avec la
+bibliotheque standard Python `smtplib` + `email`), dont le corps est
+construit dynamiquement a partir de variables (centre de services,
+service, demandeur, client, adresse, libelle, symptome).
 
 ## Installation
 
@@ -22,43 +13,7 @@ source .venv/bin/activate  # ou .venv\Scripts\activate sous Windows
 pip install -r requirements.txt
 ```
 
-`pywin32` et `psutil` (necessaires uniquement a `app.main`, Outlook) ne
-s'installent que sous Windows ; sur un autre OS, seul `app.main_smtp` est
-utilisable.
-
----
-
-## Option A - Webservice Outlook (`app.main`)
-
-Pilote le client Outlook Desktop installe sur le poste. Au demarrage d'une
-requete, le service verifie si Outlook est deja charge ; si ce n'est pas le
-cas, il le lance automatiquement avant d'envoyer le message.
-
-Pre-requis :
-- Windows avec Microsoft Outlook Desktop installe et configure (un compte de
-  messagerie doit deja etre configure dans Outlook).
-- Sur le(s) poste(s) qui LISENT le mail recu (le compte destinataire), il
-  faut desactiver l'option Outlook "Supprimer les sauts de ligne superflus
-  dans les messages en texte brut" : Fichier > Options > Courrier > decocher
-  cette case. Sans cela, Outlook fusionne automatiquement les lignes du
-  corps du message qui ne sont pas separees par une ligne vide (comportement
-  natif d'Outlook, independant de ce webservice).
-- Sur le poste qui ENVOIE (celui qui execute le webservice), si le mail
-  part malgre tout en HTML/RTF au lieu du texte brut, verifier dans Outlook :
-  Fichier > Options > Courrier > "Lors de l'envoi de messages a un
-  destinataire Exchange, toujours utiliser mon format par defaut au lieu du
-  format du destinataire" > cocher cette case. Le webservice force aussi ce
-  format directement via la propriete MAPI `PidTagMessageEditorFormat`,
-  plus fiable que la seule propriete `BodyFormat` (voir
-  `app/outlook_service.py`).
-
-Lancement :
-
-```powershell
-uvicorn app.main:app --host 0.0.0.0 --port 8443
-```
-
-## Option B - Webservice SMTP (`app.main_smtp`)
+## Configuration SMTP
 
 Envoie le mail directement par SMTP. Par defaut, aucune authentification
 ni TLS n'est utilisee (cas d'un relai SMTP interne, souvent sur le port
@@ -121,25 +76,19 @@ SMTP_FROM=service@monentreprise.com
 commite. Une variable d'environnement deja definie avant le lancement du
 webservice reste prioritaire sur le contenu de ce fichier.
 
-Lancement :
+## Lancement du webservice
 
 ```bash
 uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
 ```
 
-Le message est envoye en `Content-Type: text/plain` (via
-`email.message.EmailMessage.set_content`), sans les problemes de fusion de
-lignes propres a l'automatisation Outlook.
-
-> Pour lancer les deux webservices en meme temps sur le meme poste,
-> utiliser un port different pour l'un des deux (`--port 8444` par exemple).
-
----
+Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
+`/api/v1/mail`. Le message est envoye en `Content-Type: text/plain` (via
+`email.message.EmailMessage.set_content`).
 
 ## Envoyer un mail (POST /api/v1/mail)
 
-Contrat identique pour les deux webservices. Le titre (objet) du mail est
-genere automatiquement au format :
+Le titre (objet) du mail est genere automatiquement au format :
 
 ```
 CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
@@ -198,9 +147,11 @@ Corps JSON attendu :
 `urgence` restent des valeurs fixes dans le corps genere (non
 parametrables pour l'instant).
 
-Le corps du mail est genere automatiquement, sur le modele suivant :
+Le corps du mail est genere automatiquement, sur le modele suivant (une
+ligne vierge en tete, puis les champs) :
 
 ```
+
 Centre_de_services=CDS-008
 Service=CDSCAEN0393
 Demandeur=66502
@@ -222,9 +173,9 @@ Reponse en cas de succes :
 { "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: CASE OPENNING - GIP LABEO [GIP LABEO] - 26/09/2026 06:13:21)" }
 ```
 
-En cas d'echec (Outlook indisponible/non configure pour `app.main`,
-configuration SMTP manquante ou serveur injoignable pour `app.main_smtp`,
-etc.), le service renvoie un code HTTP 502 avec le detail de l'erreur.
+En cas d'echec (configuration SMTP manquante, serveur injoignable,
+authentification refusee, etc.), le service renvoie un code HTTP 502
+avec le detail de l'erreur.
 
 ## Verification de sante
 

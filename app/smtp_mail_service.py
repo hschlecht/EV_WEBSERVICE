@@ -1,9 +1,8 @@
 """Envoi de mail en texte brut via SMTP (bibliotheque standard uniquement).
 
-Ne depend pas d'Outlook : le message part directement par SMTP. Pense a un
-relai SMTP interne sans authentification par defaut (port 25, pas de
-TLS) ; l'authentification et le TLS restent disponibles si le serveur en
-a besoin.
+Pense a un relai SMTP interne sans authentification par defaut (port 25,
+pas de TLS) ; l'authentification et le TLS restent disponibles si le
+serveur en a besoin.
 
 La configuration peut venir de variables d'environnement classiques et/ou
 d'un fichier config.env a la racine du projet (voir app/config.py et

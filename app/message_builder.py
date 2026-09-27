@@ -1,5 +1,4 @@
-"""Construction du titre et du corps du mail (partagee entre les
-webservices Outlook et SMTP)."""
+"""Construction du titre et du corps du mail."""
 
 from __future__ import annotations
 

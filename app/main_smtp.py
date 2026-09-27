@@ -1,8 +1,6 @@
-"""Webservice FastAPI exposant l'envoi de mail via SMTP (sans Outlook).
+"""Webservice FastAPI exposant l'envoi de mail via SMTP.
 
 Lancement : uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
-(utiliser un port different si ce webservice tourne en meme temps que
-app.main, qui ecoute par defaut lui aussi sur le port 8443)
 """
 
 import logging
