@@ -29,8 +29,13 @@ def securiser_encodage_console() -> None:
 
 def afficher_requete(logger: Logger, requete: BaseModel) -> None:
     """Journalise le detail des donnees POST JSON recues (avant la
-    construction du titre/corps du message)."""
+    construction du titre/corps du message), en clair puis sous forme
+    repr() pour garantir que chaque caractere est visible sans exception
+    (y compris espaces, sauts de ligne, caracteres non imprimables ou non
+    ASCII)."""
+    json_compact = requete.model_dump_json()
     logger.info("Donnees POST JSON recues :\n%s", requete.model_dump_json(indent=2))
+    logger.info("Donnees POST JSON recues (repr, tous caracteres) : %r", json_compact)
 
 
 def afficher_message(logger: Logger, titre: str, corps: str) -> None:
