@@ -1,12 +1,17 @@
-"""Lanceur du webservice SMTP, avec une option --debug.
+"""Lanceur du webservice SMTP : HTTPS (certificat auto-signe) par
+defaut, avec une option --debug.
 
 Sans --debug : aucun detail (titre/corps du message) n'est affiche en
 console. Avec --debug : le titre et le corps de chaque message sont
 affiches avant envoi (voir app/affichage.py).
 
+Le certificat auto-signe est genere automatiquement au premier lancement
+(dossier certs/, ignore par git) et reutilise ensuite.
+
 Exemples :
     python run.py --host 0.0.0.0 --port 8443
     python run.py --debug --host 0.0.0.0 --port 8443
+    python run.py --no-https --host 0.0.0.0 --port 8443
 """
 
 from __future__ import annotations
@@ -16,6 +21,8 @@ import os
 
 import uvicorn
 
+from app.certificat import assurer_certificat_autosigne
+
 
 def analyser_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Webservice EV Mailer (SMTP)")
@@ -24,6 +31,9 @@ def analyser_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-d", "--debug", action="store_true", help="Affiche en console le titre et le corps de chaque message"
     )
+    parser.add_argument(
+        "--no-https", action="store_true", help="Desactive HTTPS et ecoute en HTTP simple (deconseille)"
+    )
     return parser.parse_args()
 
 
@@ -31,7 +41,13 @@ def main() -> None:
     args = analyser_arguments()
     os.environ["EV_WEBSERVICE_DEBUG"] = "1" if args.debug else "0"
 
-    uvicorn.run("app.main_smtp:app", host=args.host, port=args.port)
+    options_ssl = {}
+    if not args.no_https:
+        fichier_cert, fichier_cle = assurer_certificat_autosigne()
+        options_ssl = {"ssl_certfile": str(fichier_cert), "ssl_keyfile": str(fichier_cle)}
+        print(f"HTTPS active (certificat auto-signe : {fichier_cert})")
+
+    uvicorn.run("app.main_smtp:app", host=args.host, port=args.port, **options_ssl)
 
 
 if __name__ == "__main__":

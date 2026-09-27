@@ -93,8 +93,29 @@ python run.py --debug --host 0.0.0.0 --port 8443
 Sans `--debug` (par defaut), aucun detail du message n'est affiche en
 console.
 
-Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
-`/api/v1/mail`. Le message est construit manuellement en MIME multipart
+### HTTPS (certificat auto-signe)
+
+Par defaut, le webservice ecoute en **HTTPS** sur le port 8443, avec un
+certificat auto-signe genere automatiquement au premier lancement
+(`certs/cert.pem` et `certs/key.pem`, ignores par git — la cle privee
+n'est jamais commitee). Les lancements suivants reutilisent ce meme
+certificat (valide 10 ans).
+
+Un certificat auto-signe n'etant reconnu par aucune autorite, les clients
+doivent explicitement ignorer l'avertissement de securite :
+- `curl` : ajouter `-k` (ou `--insecure`).
+- PowerShell `Invoke-RestMethod` : ajouter `-SkipCertificateCheck`
+  (PowerShell 7+) ou utiliser `[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}`
+  au prealable (Windows PowerShell 5.1).
+- Navigateur : accepter manuellement l'avertissement ("Continuer vers ce site").
+
+Pour desactiver HTTPS et revenir en HTTP simple :
+
+```bash
+python run.py --no-https --host 0.0.0.0 --port 8443
+```
+
+Le message est construit manuellement en MIME multipart
 minimal :
 
 ```
@@ -130,7 +151,7 @@ Le titre (objet) du mail est genere automatiquement au format :
 ```
 
 ```bash
-curl -X POST http://localhost:8443/api/v1/mail \
+curl -k -X POST https://localhost:8443/api/v1/mail \
   -H "Content-Type: application/json" \
   -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-008", "var_service": "CDSCAEN0393", "var_demandeur": "66502", "var_client": "GIP LABEO [GIP LABEO]", "var_adresse": "GIP LABEO [GIP LABEO]", "var_intervenant": 12345, "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026", "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"}'
 ```
@@ -138,7 +159,7 @@ curl -X POST http://localhost:8443/api/v1/mail \
 En PowerShell :
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
+Invoke-RestMethod -Method Post -Uri "https://localhost:8443/api/v1/mail" -SkipCertificateCheck `
   -ContentType "application/json" `
   -Body (@{
     adresse_mail = "destinataire@exemple.com"
@@ -215,10 +236,10 @@ avec le detail de l'erreur.
 ## Verification de sante
 
 ```bash
-curl http://localhost:8443/api/v1/health
+curl -k https://localhost:8443/api/v1/health
 ```
 
 ## Documentation interactive
 
 FastAPI expose une documentation Swagger auto-generee, accessible une fois le
-service demarre : http://localhost:8443/docs
+service demarre : https://localhost:8443/docs (apres avoir accepte l'avertissement de securite dans le navigateur)

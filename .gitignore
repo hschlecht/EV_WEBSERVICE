@@ -7,3 +7,4 @@ Scripts/
 Include/
 pyvenv.cfg
 config.env
+certs/
