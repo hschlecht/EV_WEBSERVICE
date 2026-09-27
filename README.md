@@ -208,11 +208,11 @@ valeurs fixes dans le corps genere (non parametrables pour l'instant).
 Le corps du mail est genere automatiquement, sur le modele suivant :
 
 ```
-Centre_de_services=CDS-008
 Service=CDSCAEN0393
 Demandeur=66502
 Client=GIP LABEO [GIP LABEO]
 Adresse_site=GIP LABEO [GIP LABEO]
+Centre_de_services=CDS-008
 Equipe=EQ-0154
 Intervenant=12345
 ORIGINE=EMAIL

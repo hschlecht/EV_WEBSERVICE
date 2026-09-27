@@ -35,11 +35,11 @@ def construire_titre(var_client: str) -> str:
 
 
 CORPS_LIGNES = [
-    "Centre_de_services={var_cds}",
     "Service={var_service}",
     "Demandeur={var_demandeur}",
     "Client={var_client}",
     "Adresse_site={var_adresse}",
+    "Centre_de_services={var_cds}",
     "Equipe=EQ-0154",
     "Intervenant={var_intervenant}",
     "ORIGINE=EMAIL",
