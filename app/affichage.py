@@ -14,6 +14,8 @@ from __future__ import annotations
 import sys
 from logging import Logger
 
+from pydantic import BaseModel
+
 
 def securiser_encodage_console() -> None:
     """Reconfigure stdout/stderr en UTF-8, en remplacant plutot qu'en
@@ -23,6 +25,12 @@ def securiser_encodage_console() -> None:
             flux.reconfigure(encoding="utf-8", errors="backslashreplace")
         except (AttributeError, ValueError):
             pass
+
+
+def afficher_requete(logger: Logger, requete: BaseModel) -> None:
+    """Journalise le detail des donnees POST JSON recues (avant la
+    construction du titre/corps du message)."""
+    logger.info("Donnees POST JSON recues :\n%s", requete.model_dump_json(indent=2))
 
 
 def afficher_message(logger: Logger, titre: str, corps: str) -> None:

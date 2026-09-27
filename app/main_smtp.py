@@ -17,7 +17,7 @@ import os
 
 from fastapi import FastAPI, HTTPException
 
-from app.affichage import afficher_message, securiser_encodage_console
+from app.affichage import afficher_message, afficher_requete, securiser_encodage_console
 from app.message_builder import MailRequest, MailResponse, construire_corps_lignes, construire_titre
 from app.smtp_mail_service import MailError, send_mail
 
@@ -46,6 +46,8 @@ def construire_corps(requete: MailRequest) -> str:
 
 @app.post("/api/v1/mail", response_model=MailResponse)
 def envoyer_mail(requete: MailRequest) -> MailResponse:
+    if MODE_DEBUG:
+        afficher_requete(logger, requete)
     titre = construire_titre(requete.var_client)
     corps = construire_corps(requete)
     if MODE_DEBUG:
