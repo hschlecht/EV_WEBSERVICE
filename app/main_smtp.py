@@ -1,9 +1,19 @@
 """Webservice FastAPI exposant l'envoi de mail via SMTP.
 
-Lancement : uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
+Lancement normal (aucun detail affiche en console) :
+    python run.py --host 0.0.0.0 --port 8443
+
+Lancement en mode debug (titre + corps du message affiches avant
+envoi) :
+    python run.py --debug --host 0.0.0.0 --port 8443
+
+Le mode debug est pilote par la variable d'environnement
+EV_WEBSERVICE_DEBUG (positionnee par run.py), et non par un argument de
+la ligne de commande uvicorn directement.
 """
 
 import logging
+import os
 
 from fastapi import FastAPI, HTTPException
 
@@ -14,6 +24,8 @@ from app.smtp_mail_service import MailError, send_mail
 securiser_encodage_console()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ev_webservice_smtp")
+
+MODE_DEBUG = os.environ.get("EV_WEBSERVICE_DEBUG", "").strip().lower() in {"1", "true", "vrai", "oui", "yes"}
 
 app = FastAPI(title="EV Webservice - SMTP Mailer")
 
@@ -36,7 +48,8 @@ def construire_corps(requete: MailRequest) -> str:
 def envoyer_mail(requete: MailRequest) -> MailResponse:
     titre = construire_titre(requete.var_client)
     corps = construire_corps(requete)
-    afficher_message(logger, titre, corps)
+    if MODE_DEBUG:
+        afficher_message(logger, titre, corps)
     try:
         send_mail(
             destinataire=requete.adresse_mail,

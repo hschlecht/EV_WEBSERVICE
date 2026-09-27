@@ -79,8 +79,19 @@ webservice reste prioritaire sur le contenu de ce fichier.
 ## Lancement du webservice
 
 ```bash
-uvicorn app.main_smtp:app --host 0.0.0.0 --port 8443
+python run.py --host 0.0.0.0 --port 8443
 ```
+
+Ajouter `--debug` (ou `-d`) pour afficher en console le titre et le
+corps de chaque message avant envoi (utile pour verifier le contenu
+transmis) :
+
+```bash
+python run.py --debug --host 0.0.0.0 --port 8443
+```
+
+Sans `--debug` (par defaut), aucun detail du message n'est affiche en
+console.
 
 Le service ecoute en HTTP (pas de TLS) sur le port 8443, sur le chemin
 `/api/v1/mail`. Le message est construit manuellement en MIME multipart
