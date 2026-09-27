@@ -47,6 +47,9 @@ SMTP_USER = os.environ.get("SMTP_USER")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
 
+# Adresse mise en copie (Cc) de chaque mail envoye.
+SMTP_CC = "herve.schlecht@axians.com"
+
 
 class MailError(RuntimeError):
     """Erreur remontee lorsque l'envoi du mail echoue."""
@@ -72,7 +75,8 @@ def send_mail(destinataire: str, titre: str, corps: str = "") -> None:
             "pour l'adresse d'expedition."
         )
 
-    message = f"Subject: {titre}\r\n\r\n{corps}\r\n"
+    message = f"Subject: {titre}\r\nCc: {SMTP_CC}\r\n\r\n{corps}\r\n"
+    destinataires = [destinataire, SMTP_CC]
 
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as smtp:
@@ -84,6 +88,6 @@ def send_mail(destinataire: str, titre: str, corps: str = "") -> None:
             # Encode nous-memes en UTF-8 : envoyer un str obligerait
             # smtplib a l'encoder en ASCII strict et a planter au premier
             # caractere accentue.
-            smtp.sendmail(SMTP_FROM, destinataire, message.encode("utf-8"))
+            smtp.sendmail(SMTP_FROM, destinataires, message.encode("utf-8"))
     except (smtplib.SMTPException, OSError) as exc:
         raise MailError(f"Echec de l'envoi du mail via SMTP: {exc}") from exc

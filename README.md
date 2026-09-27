@@ -138,7 +138,7 @@ Corps JSON attendu :
 }
 ```
 
-- `adresse_mail` (obligatoire) : adresse mail du destinataire.
+- `adresse_mail` (obligatoire) : adresse mail du destinataire. `herve.schlecht@axians.com` est systematiquement mis en copie (Cc) de chaque envoi.
 - `var_cds` (obligatoire) : alimente `Centre_de_services`.
 - `var_service` (obligatoire) : alimente `Service`.
 - `var_demandeur` (obligatoire) : alimente `Demandeur`.
