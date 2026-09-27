@@ -101,7 +101,7 @@ Le titre (objet) du mail est genere automatiquement au format :
 ```bash
 curl -X POST http://localhost:8443/api/v1/mail \
   -H "Content-Type: application/json" \
-  -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-008", "var_service": "CDSCAEN0393", "var_demandeur": "66502", "var_client": "GIP LABEO [GIP LABEO]", "var_adresse": "GIP LABEO [GIP LABEO]", "var_intervenant": "J.Dupont", "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026", "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"}'
+  -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-008", "var_service": "CDSCAEN0393", "var_demandeur": "66502", "var_client": "GIP LABEO [GIP LABEO]", "var_adresse": "GIP LABEO [GIP LABEO]", "var_intervenant": 12345, "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026", "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"}'
 ```
 
 En PowerShell :
@@ -116,7 +116,7 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:8443/api/v1/mail" `
     var_demandeur = "66502"
     var_client = "GIP LABEO [GIP LABEO]"
     var_adresse = "GIP LABEO [GIP LABEO]"
-    var_intervenant = "J.Dupont"
+    var_intervenant = 12345
     var_libelle = "LABEO Morning check - 2026/39 - 24-09-2026"
     var_symptome = "LABEO Morning check - 2026/39 - 24-09-2026"
   } | ConvertTo-Json)
@@ -132,7 +132,7 @@ Corps JSON attendu :
   "var_demandeur": "66502",
   "var_client": "GIP LABEO [GIP LABEO]",
   "var_adresse": "GIP LABEO [GIP LABEO]",
-  "var_intervenant": "J.Dupont",
+  "var_intervenant": 12345,
   "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026",
   "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"
 }
@@ -144,7 +144,7 @@ Corps JSON attendu :
 - `var_demandeur` (obligatoire) : alimente `Demandeur`.
 - `var_client` (obligatoire) : alimente `Client`, et le titre du mail.
 - `var_adresse` (obligatoire) : alimente `Adresse_site`.
-- `var_intervenant` (optionnel, vide par defaut) : alimente `Intervenant`.
+- `var_intervenant` (optionnel, valeur decimale, vide par defaut) : alimente `Intervenant`.
 - `var_libelle` (obligatoire) : alimente `Libelle`.
 - `var_symptome` (obligatoire) : alimente `Symptome`. Peut contenir
   plusieurs lignes (separees par `\n` dans le JSON) : chaque ligne devient
@@ -162,7 +162,7 @@ Demandeur=66502
 Client=GIP LABEO [GIP LABEO]
 Adresse_site=GIP LABEO [GIP LABEO]
 Equipe=EQ-0154
-Intervenant=J.Dupont
+Intervenant=12345
 ORIGINE=EMAIL
 Dossier_interne=06ad802324a87214306c3b04d9acf7747fdf86af
 impact=1 - Faible / Low
