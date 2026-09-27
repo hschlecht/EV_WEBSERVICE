@@ -151,11 +151,9 @@ Corps JSON attendu :
 `urgence` restent des valeurs fixes dans le corps genere (non
 parametrables pour l'instant).
 
-Le corps du mail est genere automatiquement, sur le modele suivant (une
-ligne vierge en tete, puis les champs) :
+Le corps du mail est genere automatiquement, sur le modele suivant :
 
 ```
-
 Centre_de_services=CDS-008
 Service=CDSCAEN0393
 Demandeur=66502
