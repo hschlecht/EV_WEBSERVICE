@@ -138,7 +138,7 @@ minimal :
 
 ```
 Subject: ...
-Cc: herve.schlecht@axians.com
+Cc: toto.titi@toto.com
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="..."
 
@@ -179,13 +179,13 @@ correction effectuee est journalisee en console.
 Le titre (objet) du mail est genere automatiquement au format :
 
 ```
-[AXIANS] CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
+[XXXXXXX] CASE OPENNING - <VAR_CLIENT> - JJ/MM/AAAA HH:MM:SS
 ```
 
 ```bash
 curl -k -X POST https://localhost:8443/api/v1/mail \
   -H "Content-Type: application/json" \
-  -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-008", "var_service": "CDSCAEN0393", "var_demandeur": "66502", "var_client": "GIP LABEO [GIP LABEO]", "var_adresse": "GIP LABEO [GIP LABEO]", "var_intervenant": 12345, "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026", "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"}'
+  -d '{"adresse_mail": "destinataire@exemple.com", "var_cds": "CDS-XXX", "var_service": "XXXXXXX", "var_demandeur": "XXXXXX", "var_client": "XXXXXXXX", "var_adresse": "XXXXXX", "var_intervenant": XXXXXX, "var_libelle": "XXXXXXX Morning check - 2026/39 - 24-09-2026", "var_symptome": "XXXXXXX Morning check - 2026/39 - 24-09-2026"}'
 ```
 
 En PowerShell :
@@ -195,14 +195,14 @@ Invoke-RestMethod -Method Post -Uri "https://localhost:8443/api/v1/mail" -SkipCe
   -ContentType "application/json" `
   -Body (@{
     adresse_mail = "destinataire@exemple.com"
-    var_cds = "CDS-008"
-    var_service = "CDSCAEN0393"
-    var_demandeur = "66502"
-    var_client = "GIP LABEO [GIP LABEO]"
-    var_adresse = "GIP LABEO [GIP LABEO]"
-    var_intervenant = 12345
-    var_libelle = "LABEO Morning check - 2026/39 - 24-09-2026"
-    var_symptome = "LABEO Morning check - 2026/39 - 24-09-2026"
+    var_cds = "CDS-XXX"
+    var_service = "XXXXXXXXXX"
+    var_demandeur = "XXXXXX"
+    var_client = "XXXXXXX"
+    var_adresse = "XXXXXX"
+    var_intervenant = XXXXXX
+    var_libelle = "XXXXXX Morning check - 2026/39 - 24-09-2026"
+    var_symptome = "XXXXXXXX Morning check - 2026/39 - 24-09-2026"
   } | ConvertTo-Json)
 ```
 
@@ -211,14 +211,14 @@ Corps JSON attendu :
 ```json
 {
   "adresse_mail": "destinataire@exemple.com",
-  "var_cds": "CDS-008",
-  "var_service": "CDSCAEN0393",
-  "var_demandeur": "66502",
-  "var_client": "GIP LABEO [GIP LABEO]",
-  "var_adresse": "GIP LABEO [GIP LABEO]",
-  "var_intervenant": 12345,
-  "var_libelle": "LABEO Morning check - 2026/39 - 24-09-2026",
-  "var_symptome": "LABEO Morning check - 2026/39 - 24-09-2026"
+  "var_cds": "CDS-XXX",
+  "var_service": "XXXXXXXX",
+  "var_demandeur": "XXXXX",
+  "var_client": "XXXXXXX",
+  "var_adresse": "XXXXXXX",
+  "var_intervenant": XXXXXX,
+  "var_libelle": "XXXXX Morning check - 2026/39 - 24-09-2026",
+  "var_symptome": "XXXXXX Morning check - 2026/39 - 24-09-2026"
 }
 ```
 
@@ -240,19 +240,19 @@ valeurs fixes dans le corps genere (non parametrables pour l'instant).
 Le corps du mail est genere automatiquement, sur le modele suivant :
 
 ```
-Service=CDSCAEN0393
-Demandeur=66502
-Client=GIP LABEO [GIP LABEO]
-Adresse_site=GIP LABEO [GIP LABEO]
-Centre_de_services=CDS-008
-Equipe=EQ-0154
-Intervenant=12345
+Service=XXXXXX
+Demandeur=XXXXX
+Client=XXXXXXX
+Adresse_site=GXXXXXXX
+Centre_de_services=CDS-XXXXX
+Equipe=XXXXX
+Intervenant=XXXXXXX
 ORIGINE=EMAIL
 Dossier_interne=06ad802324a87214306c3b04d9acf7747fdf86af
 impact=1 - Faible / Low
 urgence=1 - Faible / Low
-Libelle=LABEO Morning check - 2026/39 - 24-09-2026
-Symptome=LABEO Morning check - 2026/39 - 24-09-2026
+Libelle=XXXXX Morning check - 2026/39 - 24-09-2026
+Symptome=XXXXX Morning check - 2026/39 - 24-09-2026
 ```
 
 Reponse en cas de succes :
