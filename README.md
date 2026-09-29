@@ -160,6 +160,20 @@ consequence, **le titre et le corps doivent rester strictement en ASCII**
 fait echouer l'envoi avec une erreur explicite
 plutot que de produire un message mal forme.
 
+### Reparation automatique des antislash isoles dans le JSON
+
+Un texte insere dans une valeur JSON (ex. `var_symptome`) contenant un
+antislash isole non echappe (typiquement un chemin Windows comme
+`C:\Label`, provenant d'une sonde de supervision) rend le JSON invalide
+et fait normalement echouer la requete avec `422 Unprocessable Entity`,
+avant meme d'atteindre la logique metier.
+
+Le webservice corrige automatiquement ce cas courant : tout antislash
+qui n'est pas suivi d'un caractere d'echappement JSON valide (`"`, `\`,
+`/`, `b`, `f`, `n`, `r`, `t`, `u`) est double a la volee avant le
+parsing JSON (voir `app/json_repair.py`). En mode `--debug`, une
+correction effectuee est journalisee en console.
+
 ## Envoyer un mail (POST /api/v1/mail)
 
 Le titre (objet) du mail est genere automatiquement au format :

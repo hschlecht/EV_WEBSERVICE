@@ -18,6 +18,7 @@ import os
 from fastapi import FastAPI, HTTPException, Request
 
 from app.affichage import afficher_appel_entrant, afficher_message, afficher_requete, securiser_encodage_console
+from app.json_repair import reparer_backslashes_json
 from app.message_builder import MailRequest, MailResponse, construire_corps_lignes, construire_titre
 from app.smtp_mail_service import MailError, send_mail
 
@@ -31,15 +32,32 @@ app = FastAPI(title="EV Webservice - SMTP Mailer")
 
 
 @app.middleware("http")
-async def journaliser_appel_entrant(request: Request, call_next):
-    """En mode debug, journalise chaque appel des son arrivee sur le port
-    d'ecoute (methode, chemin, client) ainsi que le JSON brut recu, avant
-    toute validation Pydantic - utile aussi pour diagnostiquer une requete
-    malformee, qui ne serait jamais visible via afficher_requete()."""
+async def journaliser_et_reparer_appel_entrant(request: Request, call_next):
+    """A chaque appel :
+    1. En mode debug, journalise l'arrivee de l'appel (methode, chemin,
+       client) et le JSON brut recu, avant toute validation Pydantic -
+       utile pour diagnostiquer une requete malformee.
+    2. Repare les antislash isoles (non echappes) dans le corps JSON, par
+       exemple un chemin Windows du type "C:\\Label" insere tel quel par
+       une sonde de supervision sans echapper l'antislash : sans ce
+       correctif, le JSON est invalide et la requete est rejetee (422)
+       avant meme d'atteindre notre logique metier (voir
+       app/json_repair.py).
+    """
+    corps_brut = await request.body()
+
     if MODE_DEBUG:
-        corps_brut = await request.body()
         client = f"{request.client.host}:{request.client.port}" if request.client else "inconnu"
         afficher_appel_entrant(logger, request.method, request.url.path, client, corps_brut)
+
+    if corps_brut:
+        texte_brut = corps_brut.decode("utf-8", errors="replace")
+        texte_repare = reparer_backslashes_json(texte_brut)
+        if texte_repare != texte_brut:
+            if MODE_DEBUG:
+                logger.info("JSON corrige automatiquement (antislash isole echappe) :\n%s", texte_repare)
+            request._body = texte_repare.encode("utf-8")  # noqa: SLF001 - relecture par le parsing JSON suivant
+
     return await call_next(request)
 
 
