@@ -27,6 +27,19 @@ def securiser_encodage_console() -> None:
             pass
 
 
+def afficher_appel_entrant(logger: Logger, methode: str, chemin: str, client: str, corps_brut: bytes) -> None:
+    """Journalise l'arrivee d'un appel HTTP sur le port d'ecoute et les
+    donnees JSON brutes transmises, avant tout traitement (y compris avant
+    la validation Pydantic) : utile pour diagnostiquer aussi les requetes
+    malformees, qui n'atteindraient jamais afficher_requete()."""
+    logger.info("Appel recu sur le port d'ecoute : %s %s depuis %s", methode, chemin, client)
+    if not corps_brut:
+        return
+    texte_brut = corps_brut.decode("utf-8", errors="backslashreplace")
+    logger.info("Donnees JSON brutes recues :\n%s", texte_brut)
+    logger.info("Donnees JSON brutes recues (repr, tous caracteres) : %r", texte_brut)
+
+
 def afficher_requete(logger: Logger, requete: BaseModel) -> None:
     """Journalise le detail des donnees POST JSON recues (avant la
     construction du titre/corps du message), en clair puis sous forme

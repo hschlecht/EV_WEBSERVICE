@@ -15,9 +15,9 @@ la ligne de commande uvicorn directement.
 import logging
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 
-from app.affichage import afficher_message, afficher_requete, securiser_encodage_console
+from app.affichage import afficher_appel_entrant, afficher_message, afficher_requete, securiser_encodage_console
 from app.message_builder import MailRequest, MailResponse, construire_corps_lignes, construire_titre
 from app.smtp_mail_service import MailError, send_mail
 
@@ -28,6 +28,19 @@ logger = logging.getLogger("ev_webservice_smtp")
 MODE_DEBUG = os.environ.get("EV_WEBSERVICE_DEBUG", "").strip().lower() in {"1", "true", "vrai", "oui", "yes"}
 
 app = FastAPI(title="EV Webservice - SMTP Mailer")
+
+
+@app.middleware("http")
+async def journaliser_appel_entrant(request: Request, call_next):
+    """En mode debug, journalise chaque appel des son arrivee sur le port
+    d'ecoute (methode, chemin, client) ainsi que le JSON brut recu, avant
+    toute validation Pydantic - utile aussi pour diagnostiquer une requete
+    malformee, qui ne serait jamais visible via afficher_requete()."""
+    if MODE_DEBUG:
+        corps_brut = await request.body()
+        client = f"{request.client.host}:{request.client.port}" if request.client else "inconnu"
+        afficher_appel_entrant(logger, request.method, request.url.path, client, corps_brut)
+    return await call_next(request)
 
 
 def construire_corps(requete: MailRequest) -> str:
