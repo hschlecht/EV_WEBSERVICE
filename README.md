@@ -7,9 +7,27 @@ service, demandeur, client, adresse, libelle, symptome).
 
 ## Installation
 
+**Linux / macOS :**
+
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Si `python3 -m venv` echoue avec une erreur du type `ensurepip is not
+available` (frequent sur Debian/Ubuntu), installer d'abord le paquet
+systeme correspondant :
+
+```bash
+sudo apt install python3-venv
+```
+
+**Windows :**
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate  # ou .venv\Scripts\activate sous Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
