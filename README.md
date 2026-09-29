@@ -222,7 +222,7 @@ Corps JSON attendu :
 }
 ```
 
-- `adresse_mail` (obligatoire) : adresse mail du destinataire. `herve.schlecht@axians.com` est systematiquement mis en copie (Cc) de chaque envoi.
+- `adresse_mail` (obligatoire) : adresse mail du destinataire. `totot.titit@toto.com` est systematiquement mis en copie (Cc) de chaque envoi.
 - `var_cds` (obligatoire) : alimente `Centre_de_services`.
 - `var_service` (obligatoire) : alimente `Service`.
 - `var_demandeur` (obligatoire) : alimente `Demandeur`.
@@ -258,7 +258,7 @@ Symptome=XXXXX Morning check - 2026/39 - 24-09-2026
 Reponse en cas de succes :
 
 ```json
-{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: [AXIANS] CASE OPENNING - GIP LABEO [GIP LABEO] - 26/09/2026 06:13:21)" }
+{ "statut": "ok", "message": "Mail envoye a destinataire@exemple.com (titre: [XXXXXX] CASE OPENNING - XXXXXXXXXX - 26/09/2026 06:13:21)" }
 ```
 
 En cas d'echec (configuration SMTP manquante, serveur injoignable,
